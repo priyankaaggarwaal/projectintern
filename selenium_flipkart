@@ -1,0 +1,47 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+
+# Function to scrape Amazon for LG soundbars
+def scrape_amazon_lg_soundbars():
+    # Set up the WebDriver (Ensure ChromeDriver is available in PATH)
+    driver = webdriver.Chrome()
+
+    # Open Amazon.in
+    driver.get("https://www.amazon.in")
+    time.sleep(2)  # Wait for the page to load
+
+    # Search for LG soundbar
+    search_box = driver.find_element(By.ID, "twotabsearchtextbox")
+    search_box.send_keys("lg soundbar")
+    search_box.send_keys(Keys.RETURN)
+    time.sleep(2)  # Wait for search results to load
+
+    # Fetch product names and prices from the first search result page
+    product_elements = driver.find_elements(By.CSS_SELECTOR, '.s-title-instructions-style .a-size-medium')
+    price_elements = driver.find_elements(By.CSS_SELECTOR, '.a-price-whole')
+
+    products = {}
+    for i in range(len(product_elements)):
+        product_name = product_elements[i].text
+
+        # If price is present, fetch it, else assign zero
+        price = price_elements[i].text if i < len(price_elements) else '0'
+        price = price.replace(',', '')  # Clean price format
+        price = int(price) if price.isdigit() else 0
+
+        products[product_name] = price
+
+    # Sorting products by price
+    sorted_products = dict(sorted(products.items(), key=lambda item: item[1]))
+
+    # Printing sorted products
+    for product, price in sorted_products.items():
+        print(f"{price} {product}")
+
+    # Close the WebDriver
+    driver.quit()
+
+# Running the function to scrape and print results
+scrape_amazon_lg_soundbars()
